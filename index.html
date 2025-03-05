@@ -70,36 +70,82 @@
 
             // Parse response JSON
             const objData = await objResponse.json();
+            //console.log(objData); // Debugging step
 
-            // Log or return data
-            console.log(objData);
-            document.querySelector("#hdrTemp").innerHTML = "Temperature: "+objData.current.temperature_2m + "F";
-            document.querySelector("#hdrHumidity").innerHTML = "Humidity: "+objData.current.relative_humidity_2m +'%';
-            document.querySelector("#hdrWindSpeed").innerHTML = "Wind Speed: "+objData.current.wind_speed_10m +'mph';
-            
-            // set image based on results of weather code in json data
+            // Display Temperature
+            document.querySelector("#hdrTemp").innerHTML += objData.current.temperature_2m + "°F";
+            document.querySelector("#hdrTemp").ariaLabel = "Current Temperature of " + objData.current.temperature_2m + " degrees Fahrenheit.";
+
+            // Display Humidity
+            document.querySelector("#hdrHumidity").innerHTML = "Humidity: " + objData.current.relative_humidity_2m + '%';
+            document.querySelector("#hdrHumidity").ariaLabel = "Humidity is about " + objData.current.relative_humidity_2m + " percent.";
+
+            // Display Wind Speed
+            document.querySelector("#hdrWindSpeed").innerHTML = "Wind Speed: " + objData.current.wind_speed_10m + " mph";
+            document.querySelector("#hdrWindSpeed").ariaLabel = "Wind Speed of " + objData.current.wind_speed_10m + " miles per hour.";
+
+            // wind speed indicator determined by mph
+            if(objData.current.wind_speed_10m <= 7)
+            {
+                document.querySelector("#imgCurrentWind").className += " bi bi-sun"
+                document.querySelector("#imgCurrentWind").ariaLabel += " sun indicating low or no wind"
+            }
+            else  if (objData.current.wind_speed_10m > 7 && objData.current.wind_speed_10m < 30) {
+                document.querySelector("#imgCurrentWind").className += " bi bi-cloud-haze2"
+                document.querySelector("#imgCurrentWind").ariaLabel += " cloud with wind icon indicating low wind"
+
+            }
+             else if (objData.current.wind_speed_10m >=30) {
+                document.querySelector("#imgCurrentWind").className += " bi bi-wind"
+                document.querySelector("#imgCurrentWind").ariaLabel += " breeze icon indicating high wind"
+
+            }
+            else{
+                document.querySelector("#imgCurrentWind").className += " bi bi-cloud"
+                document.querySelector("#imgCurrentWind").ariaLabel += " cloud icon indicating that the wind speed could not be found"
+
+            }
+            // display type of percipitation
+            // Determine Rain Type
+            let strRainType = objData.current.precipitation;
+            if (objData.current.precipitation <= 0) {
+                strRainType = ' Clear';
+            } else if (objData.current.rain > 0) {
+                strRainType = 'Rain';
+            } else if (objData.current.snowfall > 0) {
+                strRainType = "Snow";
+            } else if (objData.current.showers > 0) {
+                strRainType = "Light Rain";
+            } else {
+                strRainType = "Precipitation";
+            }
+            document.querySelector("#hdrType").innerHTML += strRainType
+            // Set Weather Icon Based on Weather Code
+        
             let intWeatherCode = objData.current.weather_code;
-            //console.log(intWeatherCode) // debugging
-            intWeatherCode = 0;
-            if(intWeatherCode <= 0){ // clear skys
-                document.querySelector("#imgCurrentWeather").className += " bi bi-cloud fs-1"
-            }
-            else if(intWeatherCode < 20){ // cloudy weather
+            let imgCurrentWeather = document.querySelector("#imgCurrentWeather");
 
-            }
-            else if(intWeatherCode < 29){ // rain
-
-            }
-            else if (intWeatherCode < 50 || intWeatherCode >= 90){ // Thunderstorm/windstorm
-
-            }
-            else if(intWeatherCode < 70){ // light rain
-            
-            }
-            else if(intWeatherCode < 80){ // snow and ice
-            }
-            else{ // greater than 80 is general percipitation
-
+            if (intWeatherCode <= 0) { // Clear skies
+                imgCurrentWeather.className = "card-img-top bi bi-sun-fill fs-0";
+                imgCurrentWeather.alt = "Indicator of clear weather";
+            } else if (intWeatherCode < 20) { // Cloudy
+                imgCurrentWeather.className = "card-img-top bi bi-cloud fs-0";
+                imgCurrentWeather.alt = "Indicator of cloudy weather";
+            } else if (intWeatherCode < 29) { // Rain
+                imgCurrentWeather.className = "card-img-top bi bi-cloud-fill fs-0";
+                imgCurrentWeather.alt = "Indicator of rainy weather";
+            } else if (intWeatherCode < 50 || intWeatherCode >= 90) { // Thunderstorm/Windstorm
+                imgCurrentWeather.className = "card-img-top bi bi-cloud-lightning-rain-fill";
+                imgCurrentWeather.alt = "Indicator of a thunderstorm";
+            } else if (intWeatherCode < 70) { // Light rain
+                imgCurrentWeather.className = "card-img-top bi bi-cloud-drizzle-fill";
+                imgCurrentWeather.alt = "Indicator of light rain";
+            } else if (intWeatherCode < 80) { // Snow and ice
+                imgCurrentWeather.className = "card-img-top bi bi-cloud-fill";
+                imgCurrentWeather.alt = "Indicator of snow";
+            } else { // General precipitation
+                imgCurrentWeather.className = "card-img-top bi bi-cloud-fill fs-0";
+                imgCurrentWeather.alt = "Indicator of rainy weather";
             }
 
             return objData;
