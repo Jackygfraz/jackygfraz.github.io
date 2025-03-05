@@ -2,80 +2,62 @@
 <html lang="en">
 
 <head>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/cerulean/bootstrap.min.css" integrity="sha384-3fdgwJw17Bi87e1QQ4fsLn4rUFqWw//KU0g8TvV6quvahISRewev6/EocKNuJmEw" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
-
-    <style>
-        .section-height {
-            min-height: 200px;
-        }
-        </style>
-        /* Ensures a minimum height for each section */
-  
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <title>Weather Board</title>
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-    <link rel="apple-touch-icon" 60x60.png">
-    <link rel="apple-touch-icon" icon-ipad-76x76.png">
-    <link rel="apple-touch-icon" icon-iphone-retina-120x120.png">
-    <link rel="apple-touch-icon" icon-ipad-retina-152x152.png">
-    <link href="images/apple-touch-icon-iphone- sizes=" 60x60" href="images/apple-touch- sizes=" 114x114"
-        href="images/apple-touch- sizes=" 144x144" href="images/apple-touch-integrity="sha384- T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap- icons@1.11.3/font/bootstrap-icons.css">
-
-<body class="bg-light">
-    
-
+    <title>Weather Application</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!--Bootstrap: Theme slate, Icons-->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/cerulean/bootstrap.min.css" integrity="sha384-3fdgwJw17Bi87e1QQ4fsLn4rUFqWw//KU0g8TvV6quvahISRewev6/EocKNuJmEw" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
 </head>
-    <div class="container mt-5">
-        <!-- Main Card -->
-        <form class="card p-3">
-            <!-- Top Row with Two Sections -->
-            <div class="d-flex flex-row gap-3">
-                <!-- First Section -->
-                <article class="card flex-fill p-3 text-center section-height">
-                    <h1 class="card-title text-capitalize">Current Weather</h1>
-                    <i id="imgCurrentWeather" class="card-img-top" style="font-size:50px;"
-                        alt="Weather icon"></i>
-                    <h5 class="mt-3">Today's Conditions</h5>
-                    <h6 id="hdrTemp" class="m-2"><i id="imgCurrentWeather" class="bi bi-thermometer" ></i></h6>
-                    <h6 id="hdrHumidity" class="m-2">Humidity: </h6>
-                </article>
+<body>
+<div class="d-flex justify-content-center flex-row">
+    <form class="card col-6 col-md-4 col-lg-3" id="frmHeader">
+        <h1 class="card-title text-center text-capitalize">Current Weather</h1>
 
-                <!-- Second Section -->
-                <article
-                    class="card flex-fill p-3 text-center section-height d-flex align-items-center justify-content-center">
-                    <h1 class="card-title">percipitation</h1>
-                    <i id="imgCurrentWeatherRain" class="card-img-top" style="font-size:50px;" alt="Weather icon"></i>
-                    <h6 id="hdrWindSpeed" class="m-2">Wind Speed: </h6>
-                    <h6 id="hdrRainType" class="m-2">Type: </h6>
-
-            </article>
+        <!--Current conditions indicator card-->
+        <div class="card">
+            <i id="imgCurrentWeather" class="card-img-top text-center" alt="Card image cap displaying the current weather"></i>
+            <div class="card-body">
+                <h5 class="card-title">Today's Conditions</h5>
+                <h6 id="hdrTemp" class="card-subtitle m-2"></h6>
+                <h6 id="hdrHumidity" class="card-subtitle m-2"></h6>
+                <h6 id="hdrWindSpeed" class="card-subtitle m-2"></h6>
+                
             </div>
+        </div>
+    </form>
 
-            <!-- Bottom Full-Width Section -->
-            <footer class="card mt-3 p-3 text-center section-height d-flex align-items-center justify-content-center">
-                <h5 class="card-title">Bottom Box</h5>
-                <p>This section spans the width of the two sections above.</p>
-            </footer>
-        </form>
-    </div>
+    <form class="card col-6 col-md-4 col-lg-3">
+        <h1 class="card-title text-center">Second Box</h1>
+    </form>
 
-    <!-- Bootstrap JS (optional, only needed if using JS features) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!--bottom box-->
+    <div class="d-flex flex-column">
+        <form class="card col-6 col-md-4 col-lg-3">
+        <h1 class="card-title text-center">Bottom Box</h1>
+    </form>
+</div>
+    
+</div>
+
+
+
+    <!--current temperature-->
+    <!--Humidity-->
+    <!--Current conditions indicator-->
+    
 </body>
-<footer>
+<footer >
     <p class="text-center">Data courtesy of <a href="https://open-meteo.com/en/docs">Open Meteo</a></p>
 </footer>
 
 <script>
-    const strURL = "https://api.open-meteo.com/v1/forecast?latitude=36.1628&longitude=-85.5016&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FChicago"
+
+    const strURL = "https://api.open-meteo.com/v1/forecast?latitude=36.1628&longitude=-85.5016&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FChicago";
+
     async function getWeather() {
         try {
             // Await the fetch response
@@ -91,47 +73,42 @@
 
             // Log or return data
             console.log(objData);
-            document.querySelector("#hdrTemp").innerHTML += objData.current.temperature_2m + "F";
-            document.querySelector("#hdrHumidity").innerHTML = "Humidity: " + objData.current.relative_humidity_2m + '%';
-            document.querySelector("#hdrWindSpeed").innerHTML = "Wind Speed: " + objData.current.wind_speed_10m + 'mph';
-
+            document.querySelector("#hdrTemp").innerHTML = "Temperature: "+objData.current.temperature_2m + "F";
+            document.querySelector("#hdrHumidity").innerHTML = "Humidity: "+objData.current.relative_humidity_2m +'%';
+            document.querySelector("#hdrWindSpeed").innerHTML = "Wind Speed: "+objData.current.wind_speed_10m +'mph';
+            
             // set image based on results of weather code in json data
             let intWeatherCode = objData.current.weather_code;
             //console.log(intWeatherCode) // debugging
             intWeatherCode = 0;
-            if (intWeatherCode <= 0) { // clear skys
-                document.querySelector("#imgCurrentWeather").className = " card-img-top bi bi-sun-fill fs-0"
-                document.querySelector("#imgCurrentWeatherRain").className = " card-img-top bi bi-sun-fill fs-0"
+            if(intWeatherCode <= 0){ // clear skys
+                document.querySelector("#imgCurrentWeather").className += " bi bi-cloud fs-1"
+            }
+            else if(intWeatherCode < 20){ // cloudy weather
 
             }
-            else if (intWeatherCode < 20) { // cloudy weather
-                document.querySelector("#imgCurrentWeather").className += "card-img-top bi bi-cloud fs-0"
+            else if(intWeatherCode < 29){ // rain
 
             }
-            else if (intWeatherCode < 29) { // rain
-                document.querySelector("#imgCurrentWeather").className += "card-img-top bi bi-cloud-fill fs-0"
+            else if (intWeatherCode < 50 || intWeatherCode >= 90){ // Thunderstorm/windstorm
 
             }
-            else if (intWeatherCode < 50 || intWeatherCode >= 90) { // Thunderstorm/windstorm
-
+            else if(intWeatherCode < 70){ // light rain
+            
             }
-            else if (intWeatherCode < 70) { // light rain
-
+            else if(intWeatherCode < 80){ // snow and ice
             }
-            else if (intWeatherCode < 80) { // snow and ice
-            }
-            else { // greater than 80 is general percipitation
+            else{ // greater than 80 is general percipitation
 
             }
 
             return objData;
-
         } catch (objError) {
             console.error('Error fetching data:', objError);
         }
     }
 
-    // Example usage:
+    // Call the function
     getWeather();
 
 </script>
