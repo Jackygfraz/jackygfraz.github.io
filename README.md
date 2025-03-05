@@ -1,1 +1,1 @@
-# WheatherApp
+# WeatherApp
