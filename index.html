@@ -78,8 +78,12 @@
                 style="text-decoration-line: underline;">Open Meteo</a></p>
     </footer>
 
-    <script>
-        // Location testing
+    <script> 
+        // Weather API call
+        const strURL = "https://api.open-meteo.com/v1/forecast?latitude=36.1628&longitude=-85.5016&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FChicago";
+        let strLocationURL = ""
+
+        // // Location testing
         function getLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(showPosition);
@@ -91,9 +95,36 @@
         function showPosition(position) {
             document.querySelector("#demo").innerHTML = "Latitude: " + position.coords.latitude +
                 "<br>Longitude: " + position.coords.longitude;
+            // google maps api
+           strLocationURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng="+position.coords.latitude +","+ position.coords.longitude+"&key=AIzaSyDqIDKm8thRmlpdB9R4GK1AmABlXcBeiEc";
+           console.log(strLocationURL)
+           fetchGoogleAPI(strLocationURL)
+
         }
 
-        getLocation();
+    //    async function fetchGoogleAPI(){
+    //         try{
+    //             console.log("a")
+    //             const objResponse = await fetch(strLocationURL)
+
+    //             if(!objResponse.ok){
+    //                 throw new Error(`HTTP error status: ${objResponse.status}`)
+    //             }
+                
+    //             const objData = await objResponse.json();
+    //             console.log(objData)
+    //             return objData
+    //         } catch(objError){
+    //             console.error('Error fetching data:', objError);
+    //         }
+    //     }
+        function fetchGoogleAPI(strLocationURL){
+            const objResponse = fetch(strLocationURL)
+            const objData = objResponse.json()
+            console.log(objData)
+        }
+
+       
 
         function showError(error) {
             switch (error.code) {
@@ -112,9 +143,7 @@
             }
         }
 
-        // Weather API call
-        const strURL = "https://api.open-meteo.com/v1/forecast?latitude=36.1628&longitude=-85.5016&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FChicago";
-
+       
         async function getWeather() {
             try {
                 const objResponse = await fetch(strURL);
@@ -124,6 +153,8 @@
                 }
 
                 const objData = await objResponse.json();
+
+
 
                 // Display Temperature
                 document.querySelector("#hdrTemp").innerHTML += objData.current.temperature_2m + "°F";
@@ -190,6 +221,8 @@
         }
 
         getWeather();
+        getLocation();
+
     </script>
 </body>
 
