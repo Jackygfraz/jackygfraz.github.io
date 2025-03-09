@@ -78,53 +78,56 @@
                 style="text-decoration-line: underline;">Open Meteo</a></p>
     </footer>
 
-    <script> 
+    <script>         const key = "AIzaSyDqIDKm8thRmlpdB9R4GK1AmABlXcBeiEc"
+
         // Weather API call
         const strURL = "https://api.open-meteo.com/v1/forecast?latitude=36.1628&longitude=-85.5016&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FChicago";
         let strLocationURL = ""
+        let objGoogleAPIReturn =""
 
+        
         // // Location testing
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition);
+        if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    console.log(position.coords.latitude, position.coords.longitude);
+                }, function (error) {
+                    console.error('Error occurred. Error code: ' + error.code);
+                });
             } else {
-                document.querySelector("#demo").innerHTML = "Geolocation is not supported by this browser.";
+                console.log("Geolocation is not supported by this browser.");
             }
-        }
+
+        function getLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(showPosition, showError, { timeout: 20000 });
+                } else {
+                    document.querySelector("#demo").innerHTML = "Geolocation is not supported by this browser.";
+                }
+            }
+
 
         function showPosition(position) {
             document.querySelector("#demo").innerHTML = "Latitude: " + position.coords.latitude +
                 "<br>Longitude: " + position.coords.longitude;
             // google maps api
-           strLocationURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng="+position.coords.latitude +","+ position.coords.longitude+"&key=AIzaSyDqIDKm8thRmlpdB9R4GK1AmABlXcBeiEc";
-           console.log(strLocationURL)
-           fetchGoogleAPI(strLocationURL)
+           strLocationURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng="+position.coords.latitude +","+ position.coords.longitude+"&key="+key;
+           //console.log(strLocationURL)
+           objGoogleAPIReturn = fetchGoogleAPI(strLocationURL)
 
         }
+    async function fetchGoogleAPI(strLocationURL) { // AI EDIT REL
+            try {
+                const objResponse = await fetch(strLocationURL);  // Wait for fetch response
+                if (!objResponse.ok) throw new Error(`HTTP error! Status: ${objResponse.status}`);
 
-    //    async function fetchGoogleAPI(){
-    //         try{
-    //             console.log("a")
-    //             const objResponse = await fetch(strLocationURL)
+                const objData = await objResponse.json();  // Wait for JSON conversion
+                //console.log(objData);
 
-    //             if(!objResponse.ok){
-    //                 throw new Error(`HTTP error status: ${objResponse.status}`)
-    //             }
-                
-    //             const objData = await objResponse.json();
-    //             console.log(objData)
-    //             return objData
-    //         } catch(objError){
-    //             console.error('Error fetching data:', objError);
-    //         }
-    //     }
-        function fetchGoogleAPI(strLocationURL){
-            const objResponse = fetch(strLocationURL)
-            const objData = objResponse.json()
-            console.log(objData)
+                return objData;  // Return the data for further use
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
         }
-
-       
 
         function showError(error) {
             switch (error.code) {
@@ -221,7 +224,9 @@
         }
 
         getWeather();
-        getLocation();
+        window.onload = function () {
+                getLocation();
+            };
 
     </script>
 </body>
