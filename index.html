@@ -60,6 +60,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <!-- Left Side: Text Content -->
                 <div>
+                    <button id="btnGetLocation" >Get Location</button>
                     <h5 class="mt-3 text-primary">Location Name</h5>
                     <p id="demo" class="m-2"></p>
                 </div>
@@ -79,155 +80,143 @@
     </footer>
 
     <script>         const key = "AIzaSyDqIDKm8thRmlpdB9R4GK1AmABlXcBeiEc"
+    // Your Weather API URL (this should be dynamically adjusted as needed)
+    const strURL = "https://api.open-meteo.com/v1/forecast?latitude=36.1628&longitude=-85.5016&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FChicago";
+    let strLocationURL = "";
+    let objGoogleAPIReturn = "";
+    //************************************
+   
+    var stored = localStorage['myKey'];
+    if (stored) myVar = JSON.parse(stored);
+    else myVar = {a:'test', b: [1, 2, 3]};
 
-        // Weather API call
-        const strURL = "https://api.open-meteo.com/v1/forecast?latitude=36.1628&longitude=-85.5016&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FChicago";
-        let strLocationURL = ""
-        let objGoogleAPIReturn =""
+    localStorage['myKey'] = JSON.stringify(myVar);
 
-        
-        // // Location testing
-        if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    console.log(position.coords.latitude, position.coords.longitude);
-                }, function (error) {
-                    console.error('Error occurred. Error code: ' + error.code);
-                });
+    document.querySelector("#btnGetLocation").addEventListener("click", function(){
+        event.preventDefault()
+        getLocation()
+    })
+    //*************************************/
+    // Geolocation and weather functionality
+
+    //***************
+    
+    function getLocation() {
+            console.log("A")
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
             } else {
-                console.log("Geolocation is not supported by this browser.");
+                console.log("fail")
+                document.querySelector("#demo").innerHTML = "Geolocation is not supported by this browser."
             }
-
-        function getLocation() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(showPosition, showError, { timeout: 20000 });
-                } else {
-                    document.querySelector("#demo").innerHTML = "Geolocation is not supported by this browser.";
-                }
-            }
-
+        }
 
         function showPosition(position) {
+            console.log("c")
             document.querySelector("#demo").innerHTML = "Latitude: " + position.coords.latitude +
                 "<br>Longitude: " + position.coords.longitude;
-            // google maps api
-           strLocationURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng="+position.coords.latitude +","+ position.coords.longitude+"&key="+key;
-           //console.log(strLocationURL)
-           objGoogleAPIReturn = fetchGoogleAPI(strLocationURL)
-
-        }
-    async function fetchGoogleAPI(strLocationURL) { // AI EDIT REL
-            try {
-                const objResponse = await fetch(strLocationURL);  // Wait for fetch response
-                if (!objResponse.ok) throw new Error(`HTTP error! Status: ${objResponse.status}`);
-
-                const objData = await objResponse.json();  // Wait for JSON conversion
-                //console.log(objData);
-
-                return objData;  // Return the data for further use
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
+            // Google Maps API request (ensure your key is correct)
+            strLocationURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + position.coords.latitude + "," + position.coords.longitude + "&key=" + key;
+            console.log(position)
         }
 
         function showError(error) {
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    document.querySelector("#demo").innerHTML = "User denied the request for Geolocation."
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    document.querySelector("#demo").innerHTML = "Location information is unavailable."
-                    break;
-                case error.TIMEOUT:
-                    document.querySelector("#demo").innerHTML = "The request to get user location timed out."
-                    break;
-                case error.UNKNOWN_ERROR:
-                    document.querySelector("#demo").innerHTML = "An unknown error occurred."
-                    break;
-            }
+            console.log("Error code: " + error.code);
+            console.log("Error message: " + error.message);
+            document.querySelector("#demo").innerHTML = "Geolocation error: " + error.message;
         }
 
-       
-        async function getWeather() {
-            try {
-                const objResponse = await fetch(strURL);
-
-                if (!objResponse.ok) {
-                    throw new Error(`HTTP error status: ${objResponse.status}`);
-                }
-
-                const objData = await objResponse.json();
 
 
 
-                // Display Temperature
-                document.querySelector("#hdrTemp").innerHTML += objData.current.temperature_2m + "°F";
-                document.querySelector("#hdrTemp").ariaLabel = "Current Temperature of " + objData.current.temperature_2m + " degrees Fahrenheit.";
-
-                // Display Humidity
-                document.querySelector("#hdrHumidity").innerHTML = "Humidity: " + objData.current.relative_humidity_2m + '%';
-                document.querySelector("#hdrHumidity").ariaLabel = "Humidity is about " + objData.current.relative_humidity_2m + " percent.";
-
-                // Display Wind Speed
-                document.querySelector("#hdrWindSpeed").innerHTML = "Wind Speed: " + objData.current.wind_speed_10m + " mph";
-                document.querySelector("#hdrWindSpeed").ariaLabel = "Wind Speed of " + objData.current.wind_speed_10m + " miles per hour.";
-
-                // Wind speed indicator
-                if (objData.current.wind_speed_10m <= 7) {
-                    document.querySelector("#imgCurrentWind").className += " bi bi-sun"
-                } else if (objData.current.wind_speed_10m > 7 && objData.current.wind_speed_10m < 30) {
-                    document.querySelector("#imgCurrentWind").className += " bi bi-cloud-haze2"
-                } else if (objData.current.wind_speed_10m >= 30) {
-                    document.querySelector("#imgCurrentWind").className += " bi bi-wind"
-                } else {
-                    document.querySelector("#imgCurrentWind").className += " bi bi-cloud"
-                }
-
-                // Display type of precipitation
-                let strRainType = objData.current.precipitation;
-                if (objData.current.precipitation <= 0.5) {
-                    strRainType = 'Clear';
-                } else if (objData.current.rain > 0.5) {
-                    strRainType = 'Rain';
-                } else if (objData.current.snowfall > 0) {
-                    strRainType = "Snow";
-                } else if (objData.current.showers > 0) {
-                    strRainType = "Light Rain";
-                } else {
-                    strRainType = "Precipitation";
-                }
-                document.querySelector("#hdrType").innerHTML += strRainType
-
-                // Weather icon update based on weather code
-                let intWeatherCode = objData.current.weather_code;
-                let imgCurrentWeather = document.querySelector("#imgCurrentWeather");
-
-                if (intWeatherCode <= 0) {
-                    imgCurrentWeather.className = "card-img-top bi bi-sun-fill fs-0";
-                } else if (intWeatherCode < 20) {
-                    imgCurrentWeather.className = "card-img-top bi bi-cloud fs-0";
-                } else if (intWeatherCode < 29) {
-                    imgCurrentWeather.className = "card-img-top bi bi-cloud-fill fs-0";
-                } else if (intWeatherCode < 50 || intWeatherCode >= 90) {
-                    imgCurrentWeather.className = "card-img-top bi bi-cloud-lightning-rain-fill";
-                } else if (intWeatherCode < 70) {
-                    imgCurrentWeather.className = "card-img-top bi bi-cloud-drizzle-fill";
-                } else if (intWeatherCode < 80) {
-                    imgCurrentWeather.className = "card-img-top bi bi-cloud-fill";
-                } else {
-                    imgCurrentWeather.className = "card-img-top bi bi-cloud-fill fs-0";
-                }
-
-                return objData;
-            } catch (objError) {
-                console.error('Error fetching data:', objError);
-            }
+    async function fetchGoogleAPI(strLocationURL) {
+        try {
+            const objResponse = await fetch(strLocationURL);  // Wait for fetch response
+            if (!objResponse.ok) throw new Error(`HTTP error! Status: ${objResponse.status}`);
+            const objData = await objResponse.json();  // Wait for JSON conversion
+            return objData;
+        } catch (error) {
+            console.error("Error fetching data:", error);
         }
+    }
+    async function getWeather() {
+        try {
+            const objResponse = await fetch(strURL);
 
+            if (!objResponse.ok) {
+                throw new Error(`HTTP error status: ${objResponse.status}`);
+            }
+
+            const objData = await objResponse.json();
+
+            // Display Temperature
+            document.querySelector("#hdrTemp").innerHTML += objData.current.temperature_2m + "°F";
+            document.querySelector("#hdrTemp").ariaLabel = "Current Temperature of " + objData.current.temperature_2m + " degrees Fahrenheit.";
+
+            // Display Humidity
+            document.querySelector("#hdrHumidity").innerHTML = "Humidity: " + objData.current.relative_humidity_2m + '%';
+            document.querySelector("#hdrHumidity").ariaLabel = "Humidity is about " + objData.current.relative_humidity_2m + " percent.";
+
+            // Display Wind Speed
+            document.querySelector("#hdrWindSpeed").innerHTML = "Wind Speed: " + objData.current.wind_speed_10m + " mph";
+            document.querySelector("#hdrWindSpeed").ariaLabel = "Wind Speed of " + objData.current.wind_speed_10m + " miles per hour.";
+
+            // Wind speed indicator
+            if (objData.current.wind_speed_10m <= 7) {
+                document.querySelector("#imgCurrentWind").className += " bi bi-sun"
+            } else if (objData.current.wind_speed_10m > 7 && objData.current.wind_speed_10m < 30) {
+                document.querySelector("#imgCurrentWind").className += " bi bi-cloud-haze2"
+            } else if (objData.current.wind_speed_10m >= 30) {
+                document.querySelector("#imgCurrentWind").className += " bi bi-wind"
+            } else {
+                document.querySelector("#imgCurrentWind").className += " bi bi-cloud"
+            }
+
+            // Display type of precipitation
+            let strRainType = objData.current.precipitation;
+            if (objData.current.precipitation <= 0.5) {
+                strRainType = 'Clear';
+            } else if (objData.current.rain > 0.5) {
+                strRainType = 'Rain';
+            } else if (objData.current.snowfall > 0) {
+                strRainType = "Snow";
+            } else if (objData.current.showers > 0) {
+                strRainType = "Light Rain";
+            } else {
+                strRainType = "Precipitation";
+            }
+            document.querySelector("#hdrType").innerHTML += strRainType;
+
+            // Weather icon update based on weather code
+            let intWeatherCode = objData.current.weather_code;
+            let imgCurrentWeather = document.querySelector("#imgCurrentWeather");
+
+            if (intWeatherCode <= 0) {
+                imgCurrentWeather.className = "card-img-top bi bi-sun-fill fs-0";
+            } else if (intWeatherCode < 20) {
+                imgCurrentWeather.className = "card-img-top bi bi-cloud fs-0";
+            } else if (intWeatherCode < 29) {
+                imgCurrentWeather.className = "card-img-top bi bi-cloud-fill fs-0";
+            } else if (intWeatherCode < 50 || intWeatherCode >= 90) {
+                imgCurrentWeather.className = "card-img-top bi bi-cloud-lightning-rain-fill";
+            } else if (intWeatherCode < 70) {
+                imgCurrentWeather.className = "card-img-top bi bi-cloud-drizzle-fill";
+            } else if (intWeatherCode < 80) {
+                imgCurrentWeather.className = "card-img-top bi bi-cloud-fill";
+            } else {
+                imgCurrentWeather.className = "card-img-top bi bi-cloud-fill fs-0";
+            }
+
+            return objData;
+        } catch (objError) {
+            console.error('Error fetching data:', objError);
+        }
+    }
+
+    // Initialize location and weather on page load
+        //getLocation();
         getWeather();
-        window.onload = function () {
-                getLocation();
-            };
-
+   
     </script>
 </body>
 
