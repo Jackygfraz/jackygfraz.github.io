@@ -61,7 +61,7 @@
                 <!-- Left Side: Text Content -->
                 <div>
                     <button id="btnGetLocation" >Get Location</button>
-                    <h5 class="mt-3 text-primary">Location Name</h5>
+                    <h5 id="hdrAddress" class="mt-3 text-primary">Location Name</h5>
                     <p id="demo" class="m-2"></p>
                 </div>
                 <!-- Right Side: Location Icon -->
@@ -83,42 +83,123 @@
     // Your Weather API URL (this should be dynamically adjusted as needed)
     const strURL = "https://api.open-meteo.com/v1/forecast?latitude=36.1628&longitude=-85.5016&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FChicago";
     let strLocationURL = "";
-    let objGoogleAPIReturn = "";
-    //************************************
-   
-    var stored = localStorage['myKey'];
-    if (stored) myVar = JSON.parse(stored);
-    else myVar = {a:'test', b: [1, 2, 3]};
-
-    localStorage['myKey'] = JSON.stringify(myVar);
+    let objGoogleAPIReturn = "";   
 
     document.querySelector("#btnGetLocation").addEventListener("click", function(){
         event.preventDefault()
         getLocation()
     })
-    //*************************************/
-    // Geolocation and weather functionality
 
-    //***************
-    
-    function getLocation() {
-            console.log("A")
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition);
-            } else {
-                console.log("fail")
-                document.querySelector("#demo").innerHTML = "Geolocation is not supported by this browser."
+    // City location printed to html
+    function locationToHTML(){
+
+    }
+    //************************************** // CONDENSE THIS INTO ONE FUNCTION **************************************************
+ 
+    async function fetchGoogleAPI(strLocationURL) {
+        if (sessionStorage.getItem("lastAddress") !== null) {
+            console.log("lastAddress exists:", sessionStorage.getItem("lastAddress"));
+            return sessionStorage.getItem("lastAddress");
+        } else {
+            try {
+                console.log("Attempting Pull...")
+                const objResponse = await fetch(strLocationURL);  // Wait for fetch response
+                if (!objResponse.ok) throw new Error(`HTTP error! Status: ${objResponse.status}`);
+                const objData = await objResponse.json();  // Wait for JSON conversion
+
+                let objCachedAddress = objData.results?.[0]?.formatted_address || "Address not found";
+
+                // Store the address in sessionStorage for future use
+                sessionStorage.setItem("lastAddress", objCachedAddress);
+
+                return objCachedAddress;
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                return null;
             }
         }
+    }
+    // Geolocation
+    async function showPosition(position) {
+        // Display the coordinates on the webpage
+        sessionStorage.setItem("lastTimestamp", Date.now());
 
-        function showPosition(position) {
-            console.log("c")
-            document.querySelector("#demo").innerHTML = "Latitude: " + position.coords.latitude +
-                "<br>Longitude: " + position.coords.longitude;
-            // Google Maps API request (ensure your key is correct)
-            strLocationURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + position.coords.latitude + "," + position.coords.longitude + "&key=" + key;
-            console.log(position)
+        document.querySelector("#demo").innerHTML =
+            "Latitude: " + position.coords.latitude +
+            "<br>Longitude: " + position.coords.longitude;
+
+        // Create an object with coordinates
+        const objCoordinates = {
+            lat: position.coords.latitude,
+            lon: position.coords.longitude
+        };
+
+        // Log the object (for debugging)
+        console.log("Storing coordinates:", objCoordinates);
+
+        // Store in sessionStorage as a JSON string
+        sessionStorage.setItem("lastCoords", JSON.stringify(objCoordinates));
+
+        // Ensure 'key' is defined
+        if (typeof key === "undefined") {
+            console.error("Google Maps API key is not defined.");
+            return;
         }
+
+        // Construct Google Maps API request URL
+        const strLocationURL = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${key}`;
+
+        // DEBUG
+        console.log(position);
+        console.log(strLocationURL);
+
+        try {
+            // Fetch address using Google API
+            const address = await fetchGoogleAPI(strLocationURL);
+
+            if (address) {
+                document.querySelector("#hdrAddress").innerHTML = address;
+            } else {
+                document.querySelector("#hdrAddress").innerHTML = "Address not found.";
+            }
+        } catch (error) {
+            console.error("Error fetching address:", error);
+            document.querySelector("#hdrAddress").innerHTML = "Error retrieving address.";
+        }
+    }
+
+
+
+
+    function getLocation() { // starting point for finding location on button press
+
+        // Retrieve the last stored timestamp from sessionStorage
+        const lastTimestamp = sessionStorage.getItem("lastTimestamp");
+        const currentTime = Date.now();
+
+        // Check if the last address and coordinates exist, and if 2 minutes (120,000 milliseconds) or more have passed
+        if ((sessionStorage.getItem("lastAddress") !== null && sessionStorage.getItem("lastCoords") !== null) && (lastTimestamp != null || currentTime - lastTimestamp >= 10000)) {
+
+            document.querySelector("#hdrAddress").innerHTML = sessionStorage.getItem("lastAddress");
+
+            // Retrieve and parse the JSON string
+            const storedCoords = JSON.parse(sessionStorage.getItem("lastCoords"));
+            //console.log(storedCoords);
+             document.querySelector("#demo").innerHTML = `Latitude: ${storedCoords.lat}<br>Longitude: ${storedCoords.lon}`;
+        }
+
+            else{
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(showPosition);
+                } else {
+                    console.log("fail")
+                    document.querySelector("#demo").innerHTML = "Geolocation is not supported by this browser."
+                } 
+            }
+           
+        }
+
+       
 
         function showError(error) {
             console.log("Error code: " + error.code);
@@ -127,18 +208,7 @@
         }
 
 
-
-
-    async function fetchGoogleAPI(strLocationURL) {
-        try {
-            const objResponse = await fetch(strLocationURL);  // Wait for fetch response
-            if (!objResponse.ok) throw new Error(`HTTP error! Status: ${objResponse.status}`);
-            const objData = await objResponse.json();  // Wait for JSON conversion
-            return objData;
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        }
-    }
+    //********************************************************************************
     async function getWeather() {
         try {
             const objResponse = await fetch(strURL);
