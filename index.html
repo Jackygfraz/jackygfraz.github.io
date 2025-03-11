@@ -20,7 +20,23 @@
     <!-- Main Card -->
     <form class="p-3 col-12 col-md-8 col-lg-6 mx-auto">
 
-        <!-- First Section -->
+        <!-- First Section: Location -->
+        <article class="card bg-light section-height mb-3 px-3 py-2" style="border-radius:5%; min-height: auto;">
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Left Side: Text Content -->
+                <div>
+                    <button id="btnGetLocation">Get Location</button>
+                    <h5 id="hdrAddress" class="mt-3 text-primary"></h5>
+                    <p id="demo" class="m-2"></p>
+                </div>
+                <!-- Right Side: Location Icon -->
+                <div class="ms-auto text-end" style="width: 100px;">
+                    <i id="imgAdditional" class="card-img-top" style="font-size:80px;" alt="Additional icon"></i>
+                </div>
+            </div>
+        </article>
+
+        <!-- Second Section -->
         <article class="card bg-light section-height mb-3 px-3 py-2" style="border-radius:5%; min-height: auto;">
             <div class="d-flex justify-content-between align-items-center">
                 <!-- Left Side: Text Content -->
@@ -38,7 +54,7 @@
             </div>
         </article>
 
-        <!-- Second Section -->
+        <!-- Third Section -->
         <article class="card bg-light flex-fill section-height mb-3 px-3 py-2"
             style="border-radius:5%; min-height: auto;">
             <div class="d-flex justify-content-between align-items-center">
@@ -55,22 +71,7 @@
             </div>
         </article>
 
-        <!-- Third Section: Location -->
-        <article class="card bg-light section-height mb-3 px-3 py-2" style="border-radius:5%; min-height: auto;">
-            <div class="d-flex justify-content-between align-items-center">
-                <!-- Left Side: Text Content -->
-                <div>
-                    <button id="btnGetLocation" >Get Location</button>
-                    <h5 id="hdrAddress" class="mt-3 text-primary">Location Name</h5>
-                    <p id="demo" class="m-2"></p>
-                </div>
-                <!-- Right Side: Location Icon -->
-                <div class="ms-auto text-end" style="width: 100px;">
-                    <i id="imgAdditional" class="card-img-top" style="font-size:80px;" alt="Additional icon"></i>
-                </div>
-            </div>
-        </article>
-
+       
     </form>
 
     <!-- Footer -->
@@ -81,131 +82,110 @@
 
     <script>         const key = "AIzaSyDqIDKm8thRmlpdB9R4GK1AmABlXcBeiEc"
     // Your Weather API URL (this should be dynamically adjusted as needed)
-    const strURL = "https://api.open-meteo.com/v1/forecast?latitude=36.1628&longitude=-85.5016&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FChicago";
     let strLocationURL = "";
     let objGoogleAPIReturn = "";   
 
     document.querySelector("#btnGetLocation").addEventListener("click", function(){
         event.preventDefault()
-        getLocation()
+        fetchLocation()
+        getWeather();
+
     })
 
-    // City location printed to html
-    function locationToHTML(){
+    //*********************AI GENERATED FUSION OF CODE *******************************
+    // Define the base URL for the weather API
+    let strURL = "https://api.open-meteo.com/v1/forecast?latitude=36.1628&longitude=-85.5016&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FChicago";
 
+    // Function to dynamically update the weather URL based on coordinates
+    function updateWeatherURL(lat, lon) {
+        strURL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FChicago`;
+        console.log("Updated Weather API URL:", strURL);
+
+        // You can call other functions that use `strURL` here, or return it for use elsewhere.
+        // Example:
+        // fetch(strURL).then(response => response.json()).then(data => console.log(data));
     }
-    //************************************** // CONDENSE THIS INTO ONE FUNCTION **************************************************
-    // NEXT FEATURE IS UPDATING LOCATION EVERY FIVE MINUTES 
-    async function fetchGoogleAPI(strLocationURL) {
-        if (sessionStorage.getItem("lastAddress") !== null) {
-            console.log("lastAddress exists:", sessionStorage.getItem("lastAddress"));
-            return sessionStorage.getItem("lastAddress");
-        } else {
-            try {
-                console.log("Attempting Pull...")
-                const objResponse = await fetch(strLocationURL);  // Wait for fetch response
-                if (!objResponse.ok) throw new Error(`HTTP error! Status: ${objResponse.status}`);
-                const objData = await objResponse.json();  // Wait for JSON conversion
 
-                let objCachedAddress = objData.results?.[0]?.formatted_address || "Address not found";
+    // Function to fetch location data and update URL
+    async function fetchLocation() {
+        const lastTimestamp = sessionStorage.getItem("lastTimestamp");
+        const lastAddress = sessionStorage.getItem("lastAddress");
+        const lastCoords = sessionStorage.getItem("lastCoords");
+        const currentTime = Date.now();
 
-                // Store the address in sessionStorage for future use
-                sessionStorage.setItem("lastAddress", objCachedAddress);
-
-                return objCachedAddress;
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                return null;
-            }
-        }
-    }
-    // Geolocation
-    async function showPosition(position) {
-        // Display the coordinates on the webpage
-        sessionStorage.setItem("lastTimestamp", Date.now());
-
-        document.querySelector("#demo").innerHTML =
-            "Latitude: " + position.coords.latitude +
-            "<br>Longitude: " + position.coords.longitude;
-
-        // Create an object with coordinates
-        const objCoordinates = {
-            lat: position.coords.latitude,
-            lon: position.coords.longitude
-        };
-
-        // Log the object (for debugging)
-        console.log("Storing coordinates:", objCoordinates);
-
-        // Store in sessionStorage as a JSON string
-        sessionStorage.setItem("lastCoords", JSON.stringify(objCoordinates));
-
-        // Ensure 'key' is defined
-        if (typeof key === "undefined") {
-            console.error("Google Maps API key is not defined.");
+        // Check if data exists and it's within 1 minute
+        if (lastAddress && lastCoords && (currentTime - lastTimestamp < 60000)) {
+            // Use stored data
+            document.querySelector("#hdrAddress").innerHTML = lastAddress;
+            const storedCoords = JSON.parse(lastCoords);
+            document.querySelector("#demo").innerHTML = `Latitude: ${storedCoords.lat}<br>Longitude: ${storedCoords.lon}`;
+            hideButton();
             return;
         }
 
-        // Construct Google Maps API request URL
-        const strLocationURL = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${key}`;
+        // Get new location if geolocation is supported
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                // Store current coordinates and timestamp
+                const objCoordinates = {
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude
+                };
+                sessionStorage.setItem("lastTimestamp", currentTime);
+                sessionStorage.setItem("lastCoords", JSON.stringify(objCoordinates));
 
-        // DEBUG
-        console.log(position);
-        console.log(strLocationURL);
+                // Display coordinates
+                document.querySelector("#demo").innerHTML = `Latitude: ${position.coords.latitude}<br>Longitude: ${position.coords.longitude}`;
 
-        try {
-            // Fetch address using Google API
-            const address = await fetchGoogleAPI(strLocationURL);
+                // Fetch address using Google API if 5 minutes or more have passed
+                if (currentTime - lastTimestamp >= 300000 || !lastAddress) {
+                    try {
+                        const strLocationURL = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${key}`;
+                        const objResponse = await fetch(strLocationURL);
+                        const responseText = await objResponse.text(); // Get raw response for debugging
 
-            if (address) {
-                document.querySelector("#hdrAddress").innerHTML = address;
-            } else {
-                document.querySelector("#hdrAddress").innerHTML = "Address not found.";
-            }
-        } catch (error) {
-            console.error("Error fetching address:", error);
-            document.querySelector("#hdrAddress").innerHTML = "Error retrieving address.";
+                        try {
+                            const objData = JSON.parse(responseText);
+                            const address = objData.results?.[0]?.formatted_address || "Address not found";
+                            sessionStorage.setItem("lastAddress", address);
+                            document.querySelector("#hdrAddress").innerHTML = address;
+                        } catch (jsonError) {
+                            console.error("Error parsing JSON:", jsonError);
+                            console.error("Received response:", responseText);
+                            document.querySelector("#hdrAddress").innerHTML = "Error retrieving address.";
+                        }
+                    } catch (error) {
+                        console.error("Error fetching data:", error);
+                        document.querySelector("#hdrAddress").innerHTML = "Error retrieving address.";
+                    }
+                }
+
+                // Update the weather URL based on current position
+                updateWeatherURL(position.coords.latitude, position.coords.longitude);
+                hideButton();
+            }, (error) => {
+                console.log("Geolocation error:", error);
+                document.querySelector("#demo").innerHTML = "Geolocation error: " + error.message;
+
+                // Use default values if geolocation fails
+                updateWeatherURL(36.1628, -85.5016);  // Default values
+            });
+        } else {
+            console.log("Geolocation is not supported by this browser.");
+            document.querySelector("#demo").innerHTML = "Geolocation is not supported by this browser.";
+
+            // Use default values if geolocation is not supported
+            updateWeatherURL(36.1628, -85.5016);  // Default values
         }
     }
 
-
-
-
-    function getLocation() { // starting point for finding location on button press
-
-        // Retrieve the last stored timestamp from sessionStorage
-        const lastTimestamp = sessionStorage.getItem("lastTimestamp");
-        const currentTime = Date.now();
-
-        // Check if the last address and coordinates exist, and if 2 minutes (120,000 milliseconds) or more have passed
-        if ((sessionStorage.getItem("lastAddress") !== null && sessionStorage.getItem("lastCoords") !== null) && (lastTimestamp != null || currentTime - lastTimestamp >= 10000)) {
-
-            document.querySelector("#hdrAddress").innerHTML = sessionStorage.getItem("lastAddress");
-
-            // Retrieve and parse the JSON string
-            const storedCoords = JSON.parse(sessionStorage.getItem("lastCoords"));
-            //console.log(storedCoords);
-             document.querySelector("#demo").innerHTML = `Latitude: ${storedCoords.lat}<br>Longitude: ${storedCoords.lon}`;
+    // Function to hide the button
+    function hideButton() {
+        const button = document.querySelector("#btnGetLocation");
+        if (button) {
+            button.style.display = "none"; // Hide the button
         }
-
-            else{
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(showPosition);
-                } else {
-                    console.log("fail")
-                    document.querySelector("#demo").innerHTML = "Geolocation is not supported by this browser."
-                } 
-            }
-           
-        }
-
-       
-
-        function showError(error) {
-            console.log("Error code: " + error.code);
-            console.log("Error message: " + error.message);
-            document.querySelector("#demo").innerHTML = "Geolocation error: " + error.message;
-        }
+    }
 
 
     //********************************************************************************
@@ -283,10 +263,7 @@
         }
     }
 
-    // Initialize location and weather on page load
-        //getLocation();
-        getWeather();
-   
+  
     </script>
 </body>
 
